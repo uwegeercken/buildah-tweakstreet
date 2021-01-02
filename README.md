@@ -7,11 +7,11 @@ When creating an image from this base image, all required files - such as contro
 
 Example:
 
-	podman run -it --rm <îmage> engine.sh /home/tweakstreet/flows/docker-01.dfl
+	podman run -it --rm <îmage> engine.sh /home/tweakstreet/flows/myflow.dfl
 
 	or
 	
-	docker run -it --rm <îmage> engine.sh /home/tweakstreet/flows/docker-01.dfl
+	docker run -it --rm <îmage> engine.sh /home/tweakstreet/flows/myflow.dfl
 
 
 last update: uwe.geercken@web.de - 2021-01-02
