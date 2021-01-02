@@ -21,13 +21,6 @@ image_user_id=101
 image_group="tweakstreet"
 image_group_id=101
 
-#image registry
-image_registry="silent1:8083"
-image_registry_group="silent1:8082"
-image_registry_user="admin"
-image_tag="${image_registry}/${image_name}:${image_version}"
-image_tag_latest="${image_registry}/${image_name}:latest"
-
 # tweakstreet application
 tweakstreet_version="1.13.0"
 tweakstreet_url="https://tweakstreet.io/updates"
