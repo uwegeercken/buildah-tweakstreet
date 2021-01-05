@@ -65,10 +65,8 @@ then
 	curl "${tweakstreet_url}/Tweakstreet-${tweakstreet_version}-portable.tar.gz" --output "${tweakstreet_local_folder}.tar.gz"
 fi
 
-# untar the archive
+# untar the Tweakstreet ETL tool archive file
 tar -xzf ${tweakstreet_local_folder}.tar.gz
-# remove the archive
-rm ${tweakstreet_local_folder}.tar.gz
 
 # copy tweakstreet application files
 buildah copy $container "${tweakstreet_local_folder}/" "${tweakstreet_location}"
@@ -87,4 +85,12 @@ buildah commit --format "${image_format}" $container "${image_name}:${image_vers
 
 # remove working container
 buildah rm $container
+
+# remove the Tweakstreet ETL tool local folder
+if [ ! -z ${tweakstreet_local_folder+x} ]
+then
+	rm -rf ${tweakstreet_local_folder}
+fi
+
+
 
