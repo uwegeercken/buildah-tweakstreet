@@ -1,9 +1,19 @@
 #!/bin/bash
 #
-# script to create a OCI compliant image for the Tweakstreet ETL tool using buildah.
+# Script to create a OCI compliant image for the Tweakstreet ETL tool using buildah.
 #
-# the script prepares a base image which then can be used as a blueprint for other images. It pulls the version specified in "tweakstreet_version" from the Tweakstreet website.
-# the program is available in the "/opt/tweakstreet" folder.
+# The script prepares a base image which then can be used as a blueprint for other images. It pulls the version specified in "tweakstreet_version" from the Tweakstreet website. An image using this blueprint can copy all required flows, modules and data files to the /home/tweakstreet/flows folder
+#
+# A user "tweakstreet" with UID=101 and GID=101, which owns the programs files and the /home/tweakstreet folder and files is created.
+#
+# Following folders are available:
+# - the Tweakstreet ETL tool root folder: /opt/tweakstreet
+# - folder for JDBC drivers: /home/tweakstreet/.tweakstreet/drivers
+# - folder for dataflows, control flows, modules, etc: /home/tweakstreet/flows
+#
+# The /opt/tweakstreet/bin folder where the shell script to run flows - engine.sh - is located, is available on the path.
+#
+# last update: uwe.geercken@web.de - 2021-01-05
 #
 
 # base image
@@ -36,7 +46,8 @@ tweakstreet_flows="${tweakstreet_home}/flows"
 working_container="${image_name}-working-container"
 
 # start of build
-echo "[INFO] start of build..."
+
+# create the working container
 container=$(buildah --name "${working_container}" from ${image_base})
 
 # create group and user - also creates the home folder
@@ -48,12 +59,16 @@ buildah run $container mkdir -p "${tweakstreet_drivers}"
 buildah run $container mkdir -p "${tweakstreet_location}"
 buildah run $container mkdir -p "${tweakstreet_flows}"
 
-if [ ! -d "${tweakstreet_local_folder}" ]
+# if the Tweakstreet application download for the selected version is not present, download it
+if [ ! -f "${tweakstreet_local_folder}.tar.gz" ]
 then
 	curl "${tweakstreet_url}/Tweakstreet-${tweakstreet_version}-portable.tar.gz" --output "${tweakstreet_local_folder}.tar.gz"
-	tar -xzf ${tweakstreet_local_folder}.tar.gz
-	rm ${tweakstreet_local_folder}.tar.gz
 fi
+
+# untar the archive
+tar -xzf ${tweakstreet_local_folder}.tar.gz
+# remove the archive
+rm ${tweakstreet_local_folder}.tar.gz
 
 # copy tweakstreet application files
 buildah copy $container "${tweakstreet_local_folder}/" "${tweakstreet_location}"
@@ -70,6 +85,6 @@ buildah config --user="${image_user}:${image_group}" $container
 # commit container, create image
 buildah commit --format "${image_format}" $container "${image_name}:${image_version}"
 
-# remove container
+# remove working container
 buildah rm $container
 
