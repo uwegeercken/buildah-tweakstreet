@@ -15,5 +15,5 @@ Example:
 
 The resulting image can then be pushed to a registry.
 
-last update: uwe.geercken@web.de - 2021-01-05
+last update: uwe.geercken@web.de - 2021-10-17
 

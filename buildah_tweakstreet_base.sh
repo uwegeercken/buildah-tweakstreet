@@ -13,7 +13,7 @@
 #
 # The /opt/tweakstreet/bin folder where the shell script to run flows - engine.sh - is located, is available on the path.
 #
-# last update: uwe.geercken@web.de - 2021-01-05
+# last update: uwe.geercken@web.de - 2021-10-17
 #
 
 # base image
@@ -21,7 +21,7 @@ image_base=debian:buster-slim
 
 # new image
 image_name="tweakstreet-base"
-image_version="0.1"
+image_version="0.2"
 image_format="docker"
 image_author="Tweakstreet Docker Maintainers <hi@tweakstreet.io>"
 
@@ -32,7 +32,7 @@ image_group="tweakstreet"
 image_group_id=101
 
 # tweakstreet application
-tweakstreet_version="1.13.0"
+tweakstreet_version="1.18.20"
 tweakstreet_url="https://tweakstreet.io/updates"
 tweakstreet_home="/home/tweakstreet"
 tweakstreet_drivers="${tweakstreet_home}/.tweakstreet/drivers"
