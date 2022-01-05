@@ -13,7 +13,7 @@
 #
 # The /opt/tweakstreet/bin folder where the shell script to run flows - engine.sh - is located, is available on the path.
 #
-# last update: uwe.geercken@web.de - 2021-10-17
+# last update: uwe.geercken@web.de - 2022-01-05
 #
 
 # base image
@@ -21,7 +21,7 @@ image_base=debian:buster-slim
 
 # new image
 image_name="tweakstreet-base"
-image_version="0.2"
+image_version="0.3"
 image_format="docker"
 image_author="Tweakstreet Docker Maintainers <hi@tweakstreet.io>"
 
@@ -32,8 +32,8 @@ image_group="tweakstreet"
 image_group_id=101
 
 # tweakstreet application
-tweakstreet_version="1.18.20"
-tweakstreet_url="https://tweakstreet.io/updates"
+tweakstreet_version="1.19.4"
+tweakstreet_url="https://updates.tweakstreet.io/updates"
 tweakstreet_home="/home/tweakstreet"
 tweakstreet_drivers="${tweakstreet_home}/.tweakstreet/drivers"
 tweakstreet_location="/opt/tweakstreet"
@@ -51,7 +51,7 @@ working_container="${image_name}-working-container"
 container=$(buildah --name "${working_container}" from ${image_base})
 
 # create group and user - also creates the home folder
-buildah run $container addgroup --gid "${image_group_id}" "${image_group}" 
+buildah run $container addgroup --gid "${image_group_id}" "${image_group}"
 buildah run $container adduser --system --home "${tweakstreet_home}" --ingroup "${image_group}" --gecos "tweakstreet user" --shell /bin/bash --uid "${image_user_id}" "${image_user}"
 
 # create folders
@@ -91,6 +91,3 @@ if [ ! -z ${tweakstreet_local_folder+x} ]
 then
 	rm -rf ${tweakstreet_local_folder}
 fi
-
-
-
