@@ -23,24 +23,29 @@ image_base=debian:buster-slim
 image_name="tweakstreet-base"
 image_version="0.3"
 image_format="docker"
-image_author="Tweakstreet Docker Maintainers <hi@tweakstreet.io>"
+image_author="Tweakstreet Image Maintainers <hi@tweakstreet.io>"
 
 # image user
 image_user="tweakstreet"
 image_user_id=101
+image_user_home="/home/tweakstreet"
 image_group="tweakstreet"
 image_group_id=101
 
 # tweakstreet application
 tweakstreet_version="1.19.4"
-tweakstreet_url="https://updates.tweakstreet.io/updates"
-tweakstreet_home="/home/tweakstreet"
-tweakstreet_drivers="${tweakstreet_home}/.tweakstreet/drivers"
-tweakstreet_location="/opt/tweakstreet"
-tweakstreet_local_folder="Tweakstreet-${tweakstreet_version}-portable"
+tweakstreet_download_url="https://updates.tweakstreet.io/updates"
+tweakstreet_folder="/opt/tweakstreet"
+tweakstreet_download_folder="Tweakstreet-${tweakstreet_version}-portable"
 
 # tweakstreet folder for flows, modules, etc.
-tweakstreet_flows="${tweakstreet_home}/flows"
+tweakstreet_flows_folder="${image_user_home}/flows"
+
+# tweakstreet folder for data
+tweakstreet_data_folder="${image_user_home}/data"
+
+# tweakstreet folder for jdbc drivers
+tweakstreet_drivers_folder="${image_user_home}/.tweakstreet/drivers"
 
 # name of working container
 working_container="${image_name}-working-container"
@@ -52,33 +57,35 @@ container=$(buildah --name "${working_container}" from ${image_base})
 
 # create group and user - also creates the home folder
 buildah run $container addgroup --gid "${image_group_id}" "${image_group}"
-buildah run $container adduser --system --home "${tweakstreet_home}" --ingroup "${image_group}" --gecos "tweakstreet user" --shell /bin/bash --uid "${image_user_id}" "${image_user}"
+buildah run $container adduser --system --home "${image_user_home}" --ingroup "${image_group}" --gecos "tweakstreet user" --shell /bin/bash --uid "${image_user_id}" "${image_user}"
 
 # create folders
-buildah run $container mkdir -p "${tweakstreet_drivers}"
-buildah run $container mkdir -p "${tweakstreet_location}"
-buildah run $container mkdir -p "${tweakstreet_flows}"
+buildah run $container mkdir -p "${tweakstreet_folder}"
+buildah run $container mkdir -p "${tweakstreet_drivers_folder}"
+buildah run $container mkdir -p "${tweakstreet_flows_folder}"
+buildah run $container mkdir -p "${tweakstreet_data_folder}"
 
 # if the Tweakstreet application download for the selected version is not present, download it
-if [ ! -f "${tweakstreet_local_folder}.tar.gz" ]
+if [ ! -f "${tweakstreet_download_folder}.tar.gz" ]
 then
-	curl "${tweakstreet_url}/Tweakstreet-${tweakstreet_version}-portable.tar.gz" --output "${tweakstreet_local_folder}.tar.gz"
+	curl "${tweakstreet_download_url}/Tweakstreet-${tweakstreet_version}-portable.tar.gz" --output "${tweakstreet_download_folder}.tar.gz"
 fi
 
-# untar the Tweakstreet ETL tool archive file
-tar -xzf ${tweakstreet_local_folder}.tar.gz
+# untar the Tweakstreet ETL tool archive file - but only the "bin" folder and its content
+tar -xz --wildcards -f ${tweakstreet_download_folder}.tar.gz "${tweakstreet_download_folder}/bin"
 
 # copy tweakstreet application files
-buildah copy $container "${tweakstreet_local_folder}/" "${tweakstreet_location}"
+buildah copy $container "${tweakstreet_download_folder}/" "${tweakstreet_folder}"
 
 # change ownership
-buildah run $container chown -R "${image_user}":"${image_group}" "${tweakstreet_home}"
-buildah run $container chown -R "${image_user}":"${image_group}" "${tweakstreet_location}"
+buildah run $container chown -R "${image_user}":"${image_group}" "${image_user_home}"
+buildah run $container chown -R "${image_user}":"${image_group}" "${tweakstreet_folder}"
 
 # config
-buildah config --env PATH="${tweakstreet_location}/bin:/bin:$PATH" $container
+buildah config --env PATH="${tweakstreet_folder}/bin:/bin:$PATH" $container
 buildah config --author="${image_author}" $container
 buildah config --user="${image_user}:${image_group}" $container
+buildah config --workingdir "${tweakstreet_flows_folder}" $container
 
 # commit container, create image
 buildah commit --format "${image_format}" $container "${image_name}:${image_version}"
@@ -87,7 +94,7 @@ buildah commit --format "${image_format}" $container "${image_name}:${image_vers
 buildah rm $container
 
 # remove the Tweakstreet ETL tool local folder
-if [ ! -z ${tweakstreet_local_folder+x} ]
+if [ ! -z ${tweakstreet_download_folder+x} ]
 then
-	rm -rf ${tweakstreet_local_folder}
+	rm -rf ${tweakstreet_download_folder}
 fi
